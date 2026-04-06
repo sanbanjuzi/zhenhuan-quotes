@@ -1,0 +1,375 @@
+[
+  
+    {
+      "id": 1,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "不说话会变成哑巴吗",
+      "imageUrl": "images/huafei01.jpg"
+    },
+    {
+      "id": 2,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "贱人就是矫情",
+      "imageUrl": "images/huafei02.jpg"
+    },
+    {
+      "id": 3,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "不容本宫放肆也放肆多回了",
+      "imageUrl": "images/huafei03.jpg"
+    },
+    {
+      "id": 4,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "不敢冒犯也已经冒犯了",
+      "imageUrl": "images/huafei04.jpg"
+    },
+    {
+      "id": 5,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "杀了她",
+      "imageUrl": "images/huafei05.jpg"
+    },
+    {
+      "id": 6,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "墙倒众人推呀",
+      "imageUrl": "images/huafei06.jpg"
+    },
+    {
+      "id": 7,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "我做鬼都不会放过你",
+      "imageUrl": "images/huafei07.jpg"
+    },
+    {
+      "id": 8,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "以后走着瞧吧",
+      "imageUrl": "images/huafei08.jpg"
+    },
+    {
+      "id": 9,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "重刑之下还有谁敢罔顾法纪",
+      "imageUrl": "images/huafei09.jpg"
+    },
+    {
+      "id": 10,
+      "character": "华妃",
+      "episode": "未知",
+      "content": "你倒说说这喜从何来呀",
+      "imageUrl": "images/huafei10.jpg"
+    },
+    {
+      "id": 11,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "剪秋啊，本宫头好痛",
+      "imageUrl": "images/huanghou01.jpg"
+    },
+    {
+      "id": 12,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "臣妾做不到啊",
+      "imageUrl": "images/huanghou02.jpg"
+    },
+    {
+      "id": 13,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "不过人心都难测，何况是畜类",
+      "imageUrl": "images/huanghou03.jpg"
+    },
+    {
+      "id": 14,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "这么好的日子，你干嘛要扫兴啊",
+      "imageUrl": "images/huanghou04.jpg"
+    },
+    {
+      "id": 15,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "知道太多的人，命总是不长的",
+      "imageUrl": "images/huanghou05.jpg"
+    },
+    {
+      "id": 16,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "都闭嘴",
+      "imageUrl": "images/huanghou06.jpg"
+    },
+    {
+      "id": 17,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "放肆，你敢诬蔑本宫",
+      "imageUrl": "images/huanghou07.jpg"
+    },
+    {
+      "id": 18,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "怎么好端端的会弄成这个样子",
+      "imageUrl": "images/huanghou08.jpg"
+    },
+    {
+      "id": 19,
+      "character": "皇后",
+      "episode": "未知",
+      "content": "本宫永远都是不可动摇的皇后",
+      "imageUrl": "images/huanghou09.jpg"
+    },
+    {
+      "id": 20,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "不痛快就找太医，朕又不会治病",
+      "imageUrl": "images/huangshang01.jpg"
+    },
+    {
+      "id": 21,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "别为难朕",
+      "imageUrl": "images/huangshang05.jpg"
+    },
+    {
+      "id": 22,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "放肆，你们都放肆",
+      "imageUrl": "images/huangshang06.jpg"
+    },
+    {
+      "id": 23,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "读书不多，顶嘴倒快",
+      "imageUrl": "images/huangshang07.jpg"
+    },
+    {
+      "id": 24,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "死生不复相见",
+      "imageUrl": "images/huangshang02.jpg"
+    },
+    {
+      "id": 25,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "朕与嬛嬛何时有过嫌隙",
+      "imageUrl": "images/huangshang03.jpg"
+    },
+    {
+      "id": 26,
+      "character": "皇上",
+      "episode": "未知",
+      "content": "别人爱怎么议论就怎么议论",
+      "imageUrl": "images/huangshang04.jpg"
+    },
+    {
+      "id": 27,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "我是走不出这紫禁城了",
+      "imageUrl": "images/meijiejie02.jpg"
+    },
+    {
+      "id": 28,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "我未必肯放在心上",
+      "imageUrl": "images/meijiejie03.jpg"
+    },
+    {
+      "id": 29,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "我这个人本来就不爱热闹",
+      "imageUrl": "images/meijiejie04.jpg"
+    },
+    {
+      "id": 30,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "我就不能醉一回吗",
+      "imageUrl": "images/meijiejie01.jpg"
+    },
+    {
+      "id": 31,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "这罪孽可就大了",
+      "imageUrl": "images/wentaiyi01.jpg"
+    },
+    {
+      "id": 32,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "你还是放不下吗",
+      "imageUrl": "images/wentaiyi02.jpg"
+    },
+    {
+      "id": 33,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "咱们姐妹能在一起就好了",
+      "imageUrl": "images/meijiejie05.jpg"
+    },
+    {
+      "id": 34,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "一到夏天我就心慌",
+      "imageUrl": "images/meijiejie06.jpg"
+    },
+    {
+      "id": 35,
+      "character": "沈眉庄",
+      "episode": "未知",
+      "content": "有没有过一点点",
+      "imageUrl": "images/meijiejie07.jpg"
+    },
+    {
+      "id": 36,
+      "character": "齐妃",
+      "episode": "未知",
+      "content": "皇上，三阿哥又长高了",
+      "imageUrl": "images/qifei01.jpg"
+    },
+    {
+      "id": 37,
+      "character": "齐妃",
+      "episode": "未知",
+      "content": "不知道她又该怎么小心眼了",
+      "imageUrl": "images/qifei02.jpg"
+    },
+    {
+      "id": 38,
+      "character": "齐妃",
+      "episode": "未知",
+      "content": "你这话是什么意思",
+      "imageUrl": "images/qifei03.jpg"
+    },
+    {
+      "id": 39,
+      "character": "齐妃",
+      "episode": "未知",
+      "content": "认命吧",
+      "imageUrl": "images/qifei04.jpg"
+    },
+    {
+      "id": 40,
+      "character": "齐妃",
+      "episode": "未知",
+      "content": "求求你救救我，救救我",
+      "imageUrl": "images/qifei05.jpg"
+    },
+    {
+      "id": 41,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "嬛嬛一袅楚宫腰 正是臣女闺名",
+      "imageUrl": "images/zhenhuan01.jpg"
+    },
+    {
+      "id": 42,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "容不容得下是娘娘的气度",
+      "imageUrl": "images/zhenhuan02.jpg"
+    },
+    {
+      "id": 43,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "能不能让娘娘容下是嫔妾的本事",
+      "imageUrl": "images/zhenhuan03.jpg"
+    },
+    {
+      "id": 44,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "愿逆风如解意 容易莫摧残",
+      "imageUrl": "images/zhenhuan04.jpg"
+    },
+    {
+      "id": 45,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "世间的阴差阳错从未停歇",
+      "imageUrl": "images/zhenhuan05.jpg"
+    },
+    {
+      "id": 46,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "真心最要紧",
+      "imageUrl": "images/zhenhuan06.jpg"
+    },
+    {
+      "id": 47,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "您有些神志不清了吧",
+      "imageUrl": "images/wentaiyi03.jpg"
+    },
+    {
+      "id": 48,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "有些事情总是身不由己",
+      "imageUrl": "images/wentaiyi04.jpg"
+    },
+    {
+      "id": 49,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "人心贪婪",
+      "imageUrl": "images/wentaiyi05.jpg"
+    },
+    {
+      "id": 50,
+      "character": "温实初",
+      "episode": "未知",
+      "content": "你疯了",
+      "imageUrl": "images/wentaiyi06.jpg"
+    },
+    {
+      "id": 51,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "天下万民都是皇上您的子民",
+      "imageUrl": "images/zhenhuan07.jpg"
+    },
+    {
+      "id": 52,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "哀家眼里见不得脏东西",
+      "imageUrl": "images/zhenhuan08.jpg"
+    },
+    {
+      "id": 53,
+      "character": "甄嬛",
+      "episode": "未知",
+      "content": "臣妾是钮祜禄甄嬛",
+      "imageUrl": "images/zhenhuan09.jpg"
+    }
+  ]
+  

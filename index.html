@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>甄嬛传 · 台词拾遗</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Noto Serif SC"', 'Songti SC', 'SimSun', 'serif'],
+          },
+          colors: {
+            palace: {
+              mist: '#f4f0ec',
+              wall: '#ebe4df',
+              ink: '#2c2a28',
+              cinnabar: '#9c4c4c',
+              teal: '#5a7a7a',
+              paper: '#fdfcfa',
+            },
+          },
+          boxShadow: {
+            soft: '0 2px 24px rgba(44, 42, 40, 0.06), 0 8px 48px rgba(44, 42, 40, 0.04)',
+            card: '0 1px 3px rgba(44, 42, 40, 0.04), 0 12px 40px rgba(44, 42, 40, 0.06)',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --page-base: #f7f3ef;
+    }
+    html {
+      scroll-behavior: smooth;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(156, 76, 76, 0.06), transparent 50%),
+        radial-gradient(ellipse 80% 50% at 100% 50%, rgba(90, 122, 122, 0.05), transparent 45%),
+        linear-gradient(180deg, var(--page-base) 0%, #eee8e2 50%, #e8e2dc 100%);
+    }
+    body.modal-open {
+      overflow: hidden;
+    }
+    .header-logo-img {
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+    .search-glow:focus-within {
+      box-shadow:
+        0 0 0 1px rgba(156, 76, 76, 0.15),
+        0 4px 32px rgba(44, 42, 40, 0.08),
+        0 12px 48px rgba(90, 122, 122, 0.06);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-enter {
+      animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .lightbox-panel {
+      animation: modalIn 0.22s ease-out;
+    }
+    .thumb-strip {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(44, 42, 40, 0.25) transparent;
+    }
+    #loading-spinner {
+      display: none;
+    }
+    .skeleton {
+      width: 240px;
+      height: 24px;
+      background: #EEE;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      margin: 20px auto;
+    }
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #F4433633, transparent);
+      animation: shimmer 1.8s infinite;
+      transform: translateX(-100%);
+    }
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+  </style>
+</head>
+<body class="text-palace-ink antialiased">
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useMemo, useCallback, useEffect, useRef } = React;
+
+    const ITEMS_PER_PAGE = 20;
+
+    /**
+     * 将 data.json 条目统一为内部结构（content → line）
+     */
+    function normalizeDataRow(raw) {
+      const line =
+        raw.content != null
+          ? String(raw.content)
+          : raw.line != null
+            ? String(raw.line)
+            : '';
+      return {
+        id: raw.id,
+        character: raw.character,
+        episode: raw.episode,
+        imageUrl: raw.imageUrl,
+        timestamp: raw.timestamp,
+        line,
+      };
+    }
+
+    function padTimePart(n) {
+      return String(Math.max(0, Math.floor(n))).padStart(2, '0');
+    }
+
+    /** 将 timestamp 转为 分:秒；缺失或无法解析时返回 00:00 */
+    function formatMmSsFromTimestamp(rawTs) {
+      if (rawTs == null || rawTs === '') return '00:00';
+      if (typeof rawTs === 'number' && Number.isFinite(rawTs)) {
+        const sec = Math.max(0, Math.floor(rawTs));
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${padTimePart(s)}`;
+      }
+      const str = String(rawTs).trim();
+      const triple = str.match(/^(\d+):(\d{2}):(\d{2})$/);
+      if (triple) {
+        const totalMin = Number(triple[1]) * 60 + Number(triple[2]);
+        const secs = Number(triple[3]);
+        return `${totalMin}:${padTimePart(secs)}`;
+      }
+      const dual = str.match(/^(\d+):(\d{2})$/);
+      if (dual) return `${Number(dual[1])}:${padTimePart(Number(dual[2]))}`;
+      const parsed = Date.parse(str);
+      if (!Number.isNaN(parsed)) {
+        const d = new Date(parsed);
+        return `${d.getMinutes()}:${padTimePart(d.getSeconds())}`;
+      }
+      return '00:00';
+    }
+
+    /** 右下角标签：「集数字样」+ 空格 + 分:秒（无「集数」字样） */
+    function formatEpisodeTimeBadge(episode, timestamp) {
+      const timePart = formatMmSsFromTimestamp(timestamp);
+      let epPart;
+      if (episode == null || episode === '') {
+        epPart = '未知';
+      } else if (typeof episode === 'number' && Number.isFinite(episode)) {
+        epPart = `第${episode}集`;
+      } else {
+        const es = String(episode).trim();
+        if (/^-?\d+(\.\d+)?$/.test(es)) {
+          epPart = `第${es}集`;
+        } else {
+          epPart = es;
+        }
+      }
+      return `${epPart} ${timePart}`;
+    }
+
+    function normalizeLine(text) {
+      if (text == null || text === '') return '';
+      return String(text).replace(/\*\*/g, '');
+    }
+
+    function itemMatchesQuery(rawLine, rawCharacter, q) {
+      const needle = q.trim();
+      if (!needle) return false;
+      const line = normalizeLine(rawLine);
+      const character = rawCharacter == null ? '' : String(rawCharacter);
+      const lowerNeedle = needle.toLowerCase();
+      return (
+        line.includes(needle) ||
+        character.includes(needle) ||
+        line.toLowerCase().includes(lowerNeedle) ||
+        character.toLowerCase().includes(lowerNeedle)
+      );
+    }
+
+    function loadQuotesData(setData, setLoadState) {
+      return fetch('data.json', { cache: 'no-store' })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((json) => {
+          const list = Array.isArray(json) ? json : [];
+          setData(list.map(normalizeDataRow));
+          setLoadState('ready');
+        })
+        .catch((err) => {
+          console.warn('[台词数据] 加载 data.json 失败:', err);
+          setData([]);
+          setLoadState('error');
+        });
+    }
+
+    function sanitizeFileSegment(str) {
+      return String(str == null ? '未命名' : str)
+        .replace(/[\\/:*?"<>|]/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .slice(0, 80);
+    }
+
+    function inferExtension(imageUrl) {
+      const m = String(imageUrl || '').toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/);
+      if (!m) return 'jpg';
+      return m[1] === 'jpeg' ? 'jpg' : m[1];
+    }
+
+    /** 例：甄嬛传_华妃.jpg */
+    function buildDownloadFilename(character, imageUrl) {
+      const ext = inferExtension(imageUrl);
+      return `甄嬛传_${sanitizeFileSegment(character)}.${ext}`;
+    }
+
+    function triggerAnchorDownload(objectUrl, filename) {
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.setAttribute('download', filename);
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 400);
+    }
+
+    function triggerBlobDownload(blob, filename) {
+      const objectUrl = URL.createObjectURL(blob);
+      triggerAnchorDownload(objectUrl, filename);
+    }
+
+    async function fetchBlob(url) {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('fetch not ok');
+      return res.blob();
+    }
+
+    function fetchBlobXHR(url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300 && xhr.response) resolve(xhr.response);
+          else reject(new Error('xhr bad status'));
+        };
+        xhr.onerror = () => reject(new Error('xhr error'));
+        xhr.send();
+      });
+    }
+
+    /** 不设置 crossOrigin，便于同源 / file 协议下已可访问的图片绘制（若仍被污染则失败） */
+    function blobFromCanvas(imageUrl, mime, quality) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('no canvas context'));
+              return;
+            }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob(
+              (blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error('toBlob failed'));
+              },
+              mime,
+              quality
+            );
+          } catch (e) {
+            reject(e);
+          }
+        };
+        img.onerror = () => reject(new Error('image load failed'));
+        img.src = imageUrl;
+      });
+    }
+
+    /**
+     * 强制本地下载：fetch → XHR → Canvas，均通过 Blob + 临时对象 URL 触发隐藏 <a download>
+     */
+    async function forceDownload(imageUrl, filename) {
+      const safeName =
+        filename && String(filename).trim()
+          ? String(filename).trim()
+          : '甄嬛传_截图.jpg';
+
+      try {
+        const blob = await fetchBlob(imageUrl);
+        triggerBlobDownload(blob, safeName);
+        return;
+      } catch (_) { /* 继续 */ }
+
+      try {
+        const blob = await fetchBlobXHR(imageUrl);
+        triggerBlobDownload(blob, safeName);
+        return;
+      } catch (_) { /* 继续 */ }
+
+      const ext = inferExtension(imageUrl);
+      const mime =
+        ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+      const quality = mime === 'image/jpeg' ? 0.92 : undefined;
+
+      try {
+        const blob = await blobFromCanvas(imageUrl, mime, quality);
+        triggerBlobDownload(blob, safeName);
+        return;
+      } catch (_) { /* 最后提示 */ }
+
+      window.alert(
+        '当前环境无法完成下载（多为使用 file:// 打开页面导致）。请使用本地静态服务（例如在文件夹执行 npx serve 或 python -m http.server）后通过 http 访问，再点击「保存截图」。'
+      );
+    }
+
+    function HeaderTextFallback() {
+      return (
+        <div className="flex flex-col items-center text-center leading-normal">
+          <span
+            className="text-xl md:text-2xl font-bold text-palace-ink tracking-[0.35em] header-logo-img"
+            style={{ fontFamily: '"Noto Serif SC", serif' }}
+          >
+            甄嬛传
+          </span>
+          <p
+            className="mt-2 text-xs text-palace-ink/45 tracking-widest max-w-md"
+            lang="mnc"
+          >
+            ᡝᠮᡝᡵᡤᡝᠨ&nbsp;ᡤᡠᠩ&nbsp;ᠵᡠᠸᠠᠨ
+          </p>
+        </div>
+      );
+    }
+
+    function LightboxModal({ open, items, activeIndex, onClose, onSelectIndex }) {
+      const thumbRef = useRef(null);
+
+      useEffect(() => {
+        if (!open || !thumbRef.current) return;
+        const el = thumbRef.current.querySelector(`[data-thumb-idx="${activeIndex}"]`);
+        el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }, [open, activeIndex]);
+
+      const item = items[activeIndex];
+      const n = items.length;
+      const goPrev = useCallback(() => {
+        onSelectIndex((activeIndex - 1 + n) % n);
+      }, [activeIndex, n, onSelectIndex]);
+      const goNext = useCallback(() => {
+        onSelectIndex((activeIndex + 1) % n);
+      }, [activeIndex, n, onSelectIndex]);
+
+      useEffect(() => {
+        if (!open) return undefined;
+        const onKey = (e) => {
+          if (e.key === 'Escape') onClose();
+          if (e.key === 'ArrowLeft') goPrev();
+          if (e.key === 'ArrowRight') goNext();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [open, onClose, goPrev, goNext]);
+
+      if (!open || !item || n === 0) return null;
+
+      const ch = item.character || '—';
+      const label = `${formatEpisodeTimeBadge(item.episode, item.timestamp)} · ${ch}`;
+      const saveFilename = buildDownloadFilename(item.character, item.imageUrl);
+
+      return (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-5 md:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lightbox-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/65 cursor-default border-0 p-0"
+            aria-label="关闭"
+            onClick={onClose}
+          />
+          <div
+            className="lightbox-panel relative z-10 flex w-full max-w-4xl max-h-[min(92vh,900px)] flex-col rounded-2xl border border-palace-wall/50 bg-palace-paper shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-start justify-between gap-3 px-4 pt-4 pb-2 md:px-6 md:pt-5">
+              <p id="lightbox-title" className="min-w-0 text-left">
+                <span className="inline-block rounded-md bg-stone-200/90 px-2.5 py-1 text-[11px] font-medium tracking-wide text-palace-ink/85 md:text-xs">
+                  {label}
+                </span>
+              </p>
+              <button
+                type="button"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-palace-ink/55 transition hover:bg-stone-200/80 hover:text-palace-ink"
+                onClick={onClose}
+                aria-label="关闭"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="relative min-h-0 flex-1 px-3 pb-2 md:px-6">
+              <button
+                type="button"
+                className="absolute left-0 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-palace-wall/60 bg-palace-paper/95 text-palace-ink/70 shadow-sm transition hover:bg-white hover:text-palace-ink md:left-1"
+                onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                aria-label="上一张"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="absolute right-0 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-palace-wall/60 bg-palace-paper/95 text-palace-ink/70 shadow-sm transition hover:bg-white hover:text-palace-ink md:right-1"
+                onClick={(e) => { e.stopPropagation(); goNext(); }}
+                aria-label="下一张"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              <div className="flex min-h-[200px] items-center justify-center px-10 md:px-14">
+                <img
+                  key={activeIndex}
+                  src={item.imageUrl}
+                  alt={label}
+                  loading="lazy"
+                  className="max-h-[min(52vh,520px)] w-full max-w-full object-contain transition-opacity duration-200"
+                />
+              </div>
+            </div>
+
+            <div className="flex shrink-0 justify-center px-4 pb-3 md:px-6">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-lg border border-palace-ink/25 bg-transparent px-4 py-2 text-sm font-medium text-palace-ink/85 transition hover:border-palace-ink/40 hover:bg-stone-100/80"
+                onClick={() => forceDownload(item.imageUrl, saveFilename)}
+              >
+                <svg className="h-4 w-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                保存截图
+              </button>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2 border-t border-palace-wall/40 bg-stone-100/40 px-2 py-3 md:px-4">
+              <button
+                type="button"
+                className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-palace-wall/50 text-palace-ink/60 hover:bg-white sm:flex"
+                onClick={goPrev}
+                aria-label="上一张"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div
+                ref={thumbRef}
+                className="thumb-strip flex min-h-[4.5rem] flex-1 gap-2 overflow-x-auto px-1 py-1"
+              >
+                {items.map((it, idx) => {
+                  const active = idx === activeIndex;
+                  return (
+                    <button
+                      key={it.id != null ? `thumb-${it.id}` : `${it.imageUrl}-${idx}`}
+                      type="button"
+                      data-thumb-idx={idx}
+                      onClick={() => onSelectIndex(idx)}
+                      className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 bg-stone-200/50 transition ${
+                        active
+                          ? 'border-palace-ink opacity-100 ring-2 ring-palace-ink/15'
+                          : 'border-transparent opacity-45 hover:opacity-80'
+                      }`}
+                      aria-label={`缩略图 ${idx + 1}`}
+                      aria-current={active ? 'true' : undefined}
+                    >
+                      <img src={it.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-palace-wall/50 text-palace-ink/60 hover:bg-white sm:flex"
+                onClick={goNext}
+                aria-label="下一张"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [query, setQuery] = useState('');
+      const [roleFilter, setRoleFilter] = useState('全部');
+      const [headerMode, setHeaderMode] = useState('image');
+      const searchInputRef = useRef(null);
+      const [modalOpen, setModalOpen] = useState(false);
+      const [modalIndex, setModalIndex] = useState(0);
+      const [data, setData] = useState([]);
+      const [loadState, setLoadState] = useState('loading');
+      const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+      const sentinelRef = useRef(null);
+
+      useEffect(() => {
+        loadQuotesData(setData, setLoadState);
+      }, []);
+
+      const characterOptions = useMemo(() => {
+        const s = new Set();
+        data.forEach((row) => {
+          const c = row.character;
+          if (c != null && String(c).trim()) s.add(String(c).trim());
+        });
+        return Array.from(s).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
+      }, [data]);
+
+      const filtered = useMemo(() => {
+        const q = query.trim();
+        return data.filter((row) => {
+          const lineVal = row.line;
+          const charVal = row.character;
+
+          if (roleFilter === '全部') {
+            if (q.length === 0) return false;
+            return itemMatchesQuery(lineVal, charVal, query);
+          }
+
+          if (String(row.character ?? '') !== roleFilter) return false;
+          if (q.length === 0) return true;
+          return itemMatchesQuery(lineVal, charVal, query);
+        });
+      }, [query, data, roleFilter]);
+
+      useEffect(() => {
+        setVisibleCount(Math.min(ITEMS_PER_PAGE, filtered.length));
+      }, [query, roleFilter, loadState, filtered.length]);
+
+      const displayedItems = useMemo(
+        () => filtered.slice(0, visibleCount),
+        [filtered, visibleCount]
+      );
+
+      useEffect(() => {
+        if (loadState !== 'ready' || filtered.length === 0) return undefined;
+        const el = sentinelRef.current;
+        if (!el) return undefined;
+        const obs = new IntersectionObserver(
+          (entries) => {
+            if (!entries[0]?.isIntersecting) return;
+            setVisibleCount((c) => {
+              const max = filtered.length;
+              if (c >= max) return c;
+              const spin = document.getElementById('loading-spinner');
+              if (spin) spin.style.display = 'block';
+              return Math.min(c + ITEMS_PER_PAGE, max);
+            });
+          },
+          { root: null, rootMargin: '200px', threshold: 0 }
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+      }, [loadState, filtered.length, query, roleFilter, visibleCount]);
+
+      useEffect(() => {
+        const id = requestAnimationFrame(() => {
+          const spin = document.getElementById('loading-spinner');
+          if (spin) spin.style.display = 'none';
+        });
+        return () => cancelAnimationFrame(id);
+      }, [visibleCount]);
+
+      useEffect(() => {
+        if (modalOpen) {
+          document.body.classList.add('modal-open');
+        } else {
+          document.body.classList.remove('modal-open');
+        }
+        return () => document.body.classList.remove('modal-open');
+      }, [modalOpen]);
+
+      useEffect(() => {
+        if (modalOpen && (modalIndex >= filtered.length || filtered.length === 0)) {
+          setModalOpen(false);
+        }
+      }, [filtered, modalOpen, modalIndex]);
+
+      const openModal = useCallback((indexInFiltered) => {
+        setModalIndex(indexInFiltered);
+        setModalOpen(true);
+      }, []);
+
+      const closeModal = useCallback(() => setModalOpen(false), []);
+
+      const onInput = useCallback((e) => {
+        setQuery(e.target.value);
+      }, []);
+
+      const onRoleFilterChange = useCallback((e) => {
+        setRoleFilter(e.target.value);
+      }, []);
+
+      const onLogoError = useCallback(() => {
+        setHeaderMode('text');
+      }, []);
+
+      return (
+        <div className="min-h-screen flex w-full flex-col">
+          <header
+            className="bg-transparent w-full shrink-0 pt-8 pb-5 px-4"
+            role="banner"
+          >
+            <div className="flex justify-center items-center">
+              {headerMode === 'image' ? (
+                <img
+                  src="images/logo.png"
+                  alt="甄嬛传"
+                  className="header-logo-img h-20 w-auto md:h-24 object-contain"
+                  onError={onLogoError}
+                  decoding="async"
+                />
+              ) : (
+                <HeaderTextFallback />
+              )}
+            </div>
+          </header>
+
+          <div className="flex flex-1 flex-col items-center px-4 pb-16 pt-0 md:pb-24">
+            <div className="w-full max-w-2xl mx-auto text-center mb-5 md:mb-6">
+              <h1 className="text-2xl md:text-3xl font-semibold text-palace-ink tracking-wide mb-1.5">
+                台词拾遗
+              </h1>
+              <p className="text-palace-ink/50 text-sm md:text-base font-normal leading-relaxed">
+                输入一字半句，即刻浮现剧中对白
+              </p>
+            </div>
+
+            <div className="mx-auto mb-6 w-full max-w-full md:mb-8 md:w-2/3 md:max-w-none">
+              <div className="search-glow rounded-3xl bg-palace-paper/90 backdrop-blur-sm border border-palace-wall/80 transition-shadow duration-300">
+                <div className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:gap-5 md:px-6 md:py-4">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <svg className="w-5 h-5 text-palace-teal/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      ref={searchInputRef}
+                      type="search"
+                      value={query}
+                      onChange={onInput}
+                      placeholder="输入台词或角色..."
+                      autoComplete="off"
+                      className="min-w-0 flex-1 bg-transparent text-palace-ink placeholder:text-palace-ink/35 text-base md:text-lg outline-none font-medium tracking-wide"
+                      aria-label="搜索台词或角色"
+                    />
+                  </div>
+                  <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3 md:ml-auto md:w-auto">
+                    <button
+                      type="button"
+                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-palace-wall/60 bg-white/70 px-5 text-sm font-medium text-palace-ink shadow-sm transition hover:border-palace-teal/35 hover:bg-white hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palace-teal/40"
+                      onClick={() => searchInputRef.current?.focus()}
+                    >
+                      搜索
+                    </button>
+                    <select
+                      value={roleFilter}
+                      onChange={onRoleFilterChange}
+                      className="h-10 min-w-[7.5rem] shrink-0 cursor-pointer rounded-full border border-palace-wall/60 bg-white/70 pl-3 pr-8 text-sm font-medium text-palace-ink shadow-sm outline-none transition hover:border-palace-teal/35 focus-visible:ring-2 focus-visible:ring-palace-teal/40"
+                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%235a7a7a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem', appearance: 'none', WebkitAppearance: 'none' }}
+                      aria-label="按角色筛选"
+                    >
+                      <option value="全部">全部角色</option>
+                      {characterOptions.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <main className="mt-16 w-full max-w-5xl flex-1 md:mt-20">
+              {loadState === 'loading' && (
+                <p className="text-center text-palace-ink/45 text-sm tracking-[0.15em]">
+                  载入台词数据…
+                </p>
+              )}
+              {loadState === 'error' && (
+                <p className="text-center text-palace-ink/50 text-sm leading-relaxed px-2">
+                  无法加载台词数据。请确认 data.json 与页面在同一目录，并通过本地服务器访问（详见控制台警告）。
+                </p>
+              )}
+              {loadState === 'ready' && query.trim() === '' && roleFilter === '全部' && (
+                <p className="text-center text-palace-ink/35 text-sm tracking-[0.2em]">
+                  在上方输入关键词，结果将实时呈现
+                </p>
+              )}
+              {loadState === 'ready' && query.trim() !== '' && filtered.length === 0 && (
+                <p className="text-center text-palace-ink/45 text-sm">
+                  未找到与「{query.trim()}」相关的台词
+                </p>
+              )}
+              {loadState === 'ready' &&
+                query.trim() === '' &&
+                roleFilter !== '全部' &&
+                filtered.length === 0 && (
+                  <p className="text-center text-palace-ink/45 text-sm">
+                    当前角色下暂无台词卡片
+                  </p>
+                )}
+              {loadState === 'ready' && filtered.length > 0 && (
+                <div className="w-full">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 list-none p-0 m-0">
+                    {displayedItems.map((item, index) => {
+                      const lineText = normalizeLine(item.line);
+                      const charText = item.character == null ? '' : String(item.character);
+                      const bgUrl = item.imageUrl == null ? '' : String(item.imageUrl);
+                      return (
+                        <li
+                          key={item.id != null ? `id-${item.id}` : `${lineText}-${index}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => openModal(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              openModal(index);
+                            }
+                          }}
+                          className="card-enter relative min-h-[220px] cursor-pointer rounded-2xl overflow-hidden border border-palace-wall/50 shadow-card outline-none transition hover:border-palace-teal/40 hover:shadow-soft focus-visible:ring-2 focus-visible:ring-palace-teal/40"
+                          style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
+                        >
+                          {bgUrl ? (
+                            <img
+                              src={bgUrl}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                              className="absolute inset-0 h-full w-full object-cover"
+                            />
+                          ) : null}
+                        <div
+                          className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/88 via-black/45 to-black/15"
+                          aria-hidden="true"
+                        />
+                        <div className="relative z-10 flex min-h-[220px] flex-col justify-end p-5 md:p-6">
+                          <p
+                            className="text-white font-bold text-base md:text-lg leading-relaxed tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_12px_rgba(0,0,0,0.85)]"
+                          >
+                            {lineText}
+                          </p>
+                          <div className="mt-2 flex min-h-[1.125em] justify-between items-end gap-3">
+                            <p className="min-w-0 flex-1 text-sm md:text-base text-white/95 font-medium tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">
+                              <span className="text-white/75 font-normal mr-1.5">角色</span>
+                              {charText || '—'}
+                            </p>
+                            <span className="inline-flex max-w-[min(100%,11rem)] shrink-0 items-center justify-center rounded-md bg-black/50 px-2 py-1 text-center text-xs font-medium leading-none tracking-wide text-white">
+                              {formatEpisodeTimeBadge(item.episode, item.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                  </ul>
+                  <div id="loading-spinner">
+                    <div className="skeleton"></div>
+                  </div>
+                  <div
+                    id="scroll-sentinel"
+                    ref={sentinelRef}
+                    className="pointer-events-none h-4 w-full shrink-0"
+                    aria-hidden="true"
+                  />
+                  {visibleCount >= filtered.length &&
+                    filtered.length > ITEMS_PER_PAGE && (
+                      <p className="mt-8 text-center text-xs text-palace-ink/25 tracking-widest">
+                        没有更多台词了
+                      </p>
+                    )}
+                </div>
+              )}
+            </main>
+
+            <footer className="mt-16 text-center text-palace-ink/30 text-xs tracking-widest">
+              仅供学习交流 · 台词数据来源网络
+            </footer>
+          </div>
+
+          <LightboxModal
+            open={modalOpen}
+            items={filtered}
+            activeIndex={modalIndex}
+            onClose={closeModal}
+            onSelectIndex={setModalIndex}
+          />
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
